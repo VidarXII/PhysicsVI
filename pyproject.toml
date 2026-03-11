@@ -5,7 +5,7 @@ description = "Bayesian Neural Networks for the OPF problem"
 authors = ["kaarthiksundar <kaarthik01sundar@gmail.com>"]
 license = "MIT"
 readme = "README.md"
-packages = [{include = "bnn_opf"}]
+packages = [{include = "src"}]
 
 [tool.poetry.dependencies]
 python = "^3.11,<3.13"
@@ -20,6 +20,7 @@ tqdm = "^4.66.5"
 numpyro = "^0.15.2"
 optax = "^0.2.3"
 scikit-learn = "^1.5.1"
+torch = "^2.10.0"
 
 [build-system]
 requires = ["poetry-core"]

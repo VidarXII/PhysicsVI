@@ -23,7 +23,7 @@ app = typer.Typer(pretty_exceptions_show_locals=False)
 
 @app.command()
 def main(
-    data_path: Annotated[str, typer.Option('--datapath', '-p')] = './data/', 
+    data_path: Annotated[str, typer.Option('--datapath', '-p')] = '/kaggle/working/PhysicsVI/data/', 
     case: Annotated[str, typer.Option('--case', '-c')] = 'pglib_opf_case118_ieee',
     config_file: Annotated[str, typer.Option('--config', '-o')] = 'config.json',
     num_groups: Annotated[int, typer.Option(
