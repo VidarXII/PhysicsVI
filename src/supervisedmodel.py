@@ -49,9 +49,25 @@ def supervised_model(
     z = OrderedDict([ (name, create_block(name)) for name in params['output_block_dim'].keys() ])
     z_e = jnp.concatenate(list(z.values()), axis=-1)
     z_e = z_e * opf_data.Y_std + opf_data.Y_mean
-    L_predict = assess_feasibility(X, z_e, opf_data)
-    L_true = assess_feasibility(X, Y, opf_data)
+    #L_predict = assess_feasibility(X, z_e, opf_data)
+    #L_true = assess_feasibility(X, Y, opf_data)
     
+    # Add these 4 lines for the custom ELBO
+    eq_penalty = (get_equality_constraint_violations(X, z_e, opf_data) ** 2).sum(axis=1)
+    ineq_penalty = (get_inequality_constraint_violations(z_e, opf_data) ** 2).sum(axis=1)
+    cost_penalty = get_objective_value(z_e, opf_data)
+    
+    #pg, qg, vm, va = get_output_variables(z_e, opf_data)
+    #pd, qd = get_input_variables(X, opf_data)
+
+    #numpyro.deterministic('pg', pg)
+    #numpyro.deterministic('qg', qg)
+    #numpyro.deterministic('vm', vm)
+    #numpyro.deterministic('va', va)
+    numpyro.deterministic('eq_penalty', eq_penalty)
+    numpyro.deterministic('ineq_penalty', ineq_penalty)
+    numpyro.deterministic('cost_penalty', cost_penalty)
+
     # define likelihood variances 
     mean = params['likelihood_var_prior_mean']
     std = params['likelihood_var_prior_std']
@@ -64,8 +80,8 @@ def supervised_model(
         with handlers.scale(scale=1.0):
             for name in params['output_block_dim'].keys(): 
                 numpyro.sample(f'Y_{name}', dist.Normal(z[name], likelihood_std[name]).to_event(1), obs=Y[:, slices[name]])
-            numpyro.sample('L', dist.Normal(L_predict, likelihood_std['pg'] * 0.01), obs=L_true)
-     
+            #numpyro.sample('L', dist.Normal(L_predict, likelihood_std['pg'] * 0.01), obs=L_true)
+
 # supervised testing model definition
 def supervised_testing_model(
     X_norm, X, Y = None, 

@@ -16,15 +16,18 @@ from jax import jit
 import jax
 import time
 import numpy as np
+import sklearn
 from sklearn.metrics import mean_squared_error
 from acopf import *
 from supervisedmodel import *
 from stopping import *
+import random 
+from custom_elbo import *
 
 def unsupervised_model(
     X_norm, X, 
     opf_data: Union[None, OPFData] = None, 
-    vi_parameters = None):
+    vi_parameters = None, lambda_eq = 1.0, lambda_ineq = 1.0, lambda_cost = 1.0):
     
     params = get_model_params(opf_data)
     num_data_points, num_inputs = X_norm.shape
@@ -50,11 +53,26 @@ def unsupervised_model(
     z = OrderedDict([ (name, create_block(name)) for name in params['output_block_dim'].keys() ])
     z_e = jnp.concatenate(list(z.values()), axis=-1)
     z_e = z_e * opf_data.Y_std + opf_data.Y_mean
-    L = assess_feasibility(X, z_e, opf_data)
+
+    # Calculate all physics terms using your existing acopf functions
+    eq_residual = get_equality_constraint_violations(X, z_e, opf_data)
+    ineq_residual = get_inequality_constraint_violations(z_e, opf_data)
+    cost = get_objective_value(z_e, opf_data)
+
+    # Per-sample penalties (sum of squares for constraints)
+    eq_penalty = (eq_residual ** 2).sum(axis=1)
+    ineq_penalty = (ineq_residual ** 2).sum(axis=1)
+    cost_penalty = cost
+
+    #L = assess_feasibility(X, z_e, opf_data)
     
+    #with numpyro.plate('data', size=num_data_points):
+    #    numpyro.sample('L', dist.Normal(L, 1e-14), obs=0.0)
     with numpyro.plate('data', size=num_data_points):
-        numpyro.sample('L', dist.Normal(L, 1e-14), obs=0.0)
-            
+        numpyro.factor('eq_penalty', -lambda_eq * eq_penalty)
+        numpyro.factor('ineq_penalty', -lambda_ineq * ineq_penalty)
+        numpyro.factor('cost_penalty', -lambda_cost * cost_penalty)
+        
 # initial guide does not require vi_parameters
 def unsupervised_guide(
     X_norm, X, 
