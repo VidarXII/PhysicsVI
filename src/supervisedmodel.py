@@ -19,6 +19,8 @@ import numpy as np
 from sklearn.metrics import mean_squared_error
 from acopf import *
 from stopping import *
+from custom_elbo import *
+from vogn_optimizer import *
 
 # supervised model definition 
 def supervised_model(
@@ -210,15 +212,22 @@ def run_supervised(
 
     # initialize the optimizer
     learning_rate_schedule = time_based_decay_schedule(initial_learning_rate, decay_rate)
-    optimizer = chain(clip(10.0), adam(learning_rate_schedule))
-    elbo = TraceMeanField_ELBO()
-    elbo_val = TraceMeanField_ELBO(num_particles = 50)
+    optimizer = clipped_vogn(
+    learning_rate=learning_rate_schedule, 
+    clip_norm=10.0, 
+    prior_precision=1.0  # Start with 1.0 for the test run
+    )
+    elbo = OPF_ELBO(λ_eq=0.0, λ_ineq=0.0, λ_cost=0.0)
+    elbo_val = OPF_ELBO(num_particles = 50, λ_eq=0.0, λ_ineq=0.0, λ_cost=0.0)
+    
+    #elbo = TraceMeanField_ELBO()
+    #elbo_val = TraceMeanField_ELBO(num_particles = 50)
     
     # initialize the stochastic variational inference 
     svi = SVI(
         supervised_model, 
         supervised_guide, 
-        optimizer, 
+        optimizer,
         loss = elbo)
     
     svi_state = svi.init(
