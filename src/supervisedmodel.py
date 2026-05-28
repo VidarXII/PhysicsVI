@@ -217,8 +217,8 @@ def run_supervised(
     clip_norm=10.0, 
     prior_precision=1.0  # Start with 1.0 for the test run
     )
-    elbo = OPF_ELBO(λ_eq=0.0, λ_ineq=0.0, λ_cost=0.0)
-    elbo_val = OPF_ELBO(num_particles = 50, λ_eq=0.0, λ_ineq=0.0, λ_cost=0.0)
+    elbo = OPF_ELBO(lambda_eq=0.0, lambda_ineq=0.0, lambda_cost=0.0)
+    elbo_val = OPF_ELBO(num_particles = 50, lambda_eq=0.0, lambda_ineq=0.0, lambda_cost=0.0)
     
     #elbo = TraceMeanField_ELBO()
     #elbo_val = TraceMeanField_ELBO(num_particles = 50)
