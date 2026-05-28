@@ -30,7 +30,7 @@ class OPF_ELBO(TraceMeanField_ELBO):
         self.lambda_cost = lambda_cost
 
     def loss(self, rng_key, param_map, model, guide, *args, **kwargs):
-        # Get the base ELBO and full trace from the parent class
+        # 1. FIXED UNPACKING: Expecting 2 values instead of 3
         elbo, model_trace = self.loss_with_mutable_state(
             rng_key, param_map, model, guide, *args, **kwargs
         )
@@ -47,8 +47,6 @@ class OPF_ELBO(TraceMeanField_ELBO):
         if 'cost_penalty' in model_trace:
             additional_loss += self.lambda_cost * model_trace['cost_penalty']['value'].mean()
 
-        # The base ELBO returned by the parent class is already the negative ELBO,
-        # i.e. the value that SVI minimizes. So we just add our additional loss terms to it.
         total_loss = elbo + additional_loss
 
         return total_loss
