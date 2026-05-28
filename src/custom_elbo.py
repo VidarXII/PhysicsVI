@@ -31,7 +31,7 @@ class OPF_ELBO(TraceMeanField_ELBO):
 
     def loss(self, rng_key, param_map, model, guide, *args, **kwargs):
         # Get the base ELBO and full trace from the parent class
-        elbo, model_trace, guide_trace = self.loss_with_mutable_state(
+        elbo, model_trace = self.loss_with_mutable_state(
             rng_key, param_map, model, guide, *args, **kwargs
         )
 
