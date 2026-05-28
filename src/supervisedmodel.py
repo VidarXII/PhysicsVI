@@ -81,7 +81,7 @@ def supervised_model(
     with numpyro.plate('data', size=num_data_points):
         with handlers.scale(scale=1.0):
             for name in params['output_block_dim'].keys(): 
-                numpyro.sample(f'Y_{name}', dist.Normal(z[name], likelihood_std[name]).to_event(1), obs=Y[:, slices[name]])
+                numpyro.sample(f'Y_{name}', dist.Normal(z[name], likelihood_std[name]).to_event(1), obs=Y[:, slices[name]] if Y is not None else None)
             #numpyro.sample('L', dist.Normal(L_predict, likelihood_std['pg'] * 0.01), obs=L_true)
 
 # supervised testing model definition
@@ -206,7 +206,7 @@ def run_supervised(
     stop_check = None, 
     rng_key = random.PRNGKey(0)):
     
-    if (stop_check == None):
+    if stop_check is None:
         log.error('early stopping object has to be provided; cannot be None')
         exit()
 
@@ -286,7 +286,7 @@ def run_supervised(
             # )
             log.debug(f'validation loss {validation_loss}')
             stop_check.on_epoch_end(epoch, validation_loss, vi_parameters)
-        if stop_check.stop_training == True: 
+        if stop_check.stop_training:
             break
         if time.time() - start_time > max_training_time:
             # validation_loss = run_validation_supervised(
@@ -309,8 +309,8 @@ def run_supervised(
             stop_check.on_epoch_end(epoch, validation_loss, vi_parameters)
             log.info('Maximum training time for supervised round exceeded')
             break
-    return
-    
+    return vi_parameters
+
 
 # this model is not needed    
 def run_validation_supervised(opf_data: OPFData, rng_key, vi_parameters, log):
@@ -393,10 +393,11 @@ def run_test(opf_data: OPFData, rng_key, vi_parameters, log):
     
     feasibility = assess_feasibility(opf_data.X_test, y_predict_mean, opf_data)
     mse_feasibility = sum(feasibility)/len(feasibility)
+    log.info(f'feasibility rate: {mse_feasibility}')
     
     pf_residuals = get_equality_constraint_violations(opf_data.X_test, y_predict_mean, opf_data)
     
-    real_pf_res, imag_pf_res = jnp.array_split(pf_residuals, 2)
+    real_pf_res, imag_pf_res = jnp.array_split(pf_residuals, 2, axis=1)
     log.info(f'real power flow eq. residuals (max): {real_pf_res.max()}')
     log.info(f'real power flow eq. residuals (min): {real_pf_res.min()}')
     log.info(f'reactive power flow eq. residuals (max): {imag_pf_res.max()}')
