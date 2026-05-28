@@ -1,6 +1,4 @@
-from bnncommon import *
-from acopf import *
-from numpyro.infer import Predictive, SVI, Trace_ELBO, TraceGraph_ELBO, TraceMeanField_ELBO
+from numpyro.infer import TraceMeanField_ELBO
 
 class OPF_ELBO(TraceMeanField_ELBO):
     """

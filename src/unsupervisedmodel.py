@@ -12,7 +12,6 @@ from optax import adam, chain, clip, nadam
 from numpyro.infer import Predictive, SVI, Trace_ELBO, TraceGraph_ELBO, TraceMeanField_ELBO
 from numpyro import handlers
 from jax import jit, random
-import jax
 import time
 import numpy as np
 import sklearn
@@ -20,7 +19,6 @@ from sklearn.metrics import mean_squared_error
 from acopf import *
 from supervisedmodel import *
 from stopping import *
-import random 
 from custom_elbo import *
 
 def unsupervised_model(
