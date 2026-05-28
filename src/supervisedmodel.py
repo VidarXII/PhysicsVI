@@ -8,7 +8,7 @@ import jax.numpy as jnp
 from collections import OrderedDict
 from acopf import assess_feasibility
 from bnncommon import *
-from optax import adam, chain, clip, nadam
+#from optax import adam, chain, clip, nadam
 from numpyro.infer import Predictive, SVI, Trace_ELBO, TraceGraph_ELBO, TraceMeanField_ELBO
 from numpyro import handlers
 from jax import random

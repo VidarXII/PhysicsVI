@@ -1,5 +1,3 @@
-from supervisedmodel import *
-from unsupervisedmodel import * 
 from bnncommon import *
 from acopf import *
 from numpyro.infer import Predictive, SVI, Trace_ELBO, TraceGraph_ELBO, TraceMeanField_ELBO
