@@ -30,10 +30,11 @@ class OPF_ELBO(TraceMeanField_ELBO):
         self.lambda_cost = lambda_cost
 
     def loss(self, rng_key, param_map, model, guide, *args, **kwargs):
+        result = self.loss_with_mutable_state(
+        rng_key, param_map, model, guide, *args, **kwargs)
         # 1. FIXED UNPACKING: Expecting 2 values instead of 3
-        elbo, model_trace = self.loss_with_mutable_state(
-            rng_key, param_map, model, guide, *args, **kwargs
-        )
+        elbo = result["loss"]
+        model_trace = result["mutable_state"]
 
         additional_loss = 0.0
 
